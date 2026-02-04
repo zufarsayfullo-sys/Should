@@ -1,0 +1,204 @@
+
+<!DOCTYPE html><html lang="en"><head>    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>Navigate Reading: Past Regrets</title>    <style>        :root {            --primary: #4834d4;            --correct: #27ae60;            --incorrect: #eb4d4b;            --dark: #2d3436;        }        body {            font-family: 'Segoe UI', sans-serif;            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)),                         url('https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=1600&q=80');            background-size: cover; background-position: center; background-attachment: fixed;            min-height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0;        }        #quiz-card {            background: rgba(255, 255, 255, 0.98);            padding: 35px; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.6);            width: 95%; max-width: 700px; text-align: center;            max-height: 90vh; overflow-y: auto;        }        .text-box {            background: #f8f9fa; padding: 20px; border-radius: 10px;            text-align: left; margin-bottom: 25px; border-left: 6px solid var(--primary);            line-height: 1.6; font-size: 1.05rem; color: var(--dark);        }        #progress-bar {            width: 100%; background: #eee; height: 10px;            border-radius: 10px; margin-bottom: 25px; display: flex; overflow: hidden;        }        .seg { flex-grow: 1; border-right: 1px solid #fff; transition: 0.3s; }        .correct-bg { background-color: var(--correct); }        .incorrect-bg { background-color: var(--incorrect); }        .question { font-size: 1.2rem; font-weight: 600; margin-bottom: 15px; color: var(--dark); }        input[type="text"] {            width: 85%; padding: 12px; border: 2px solid #ddd;            border-radius: 8px; font-size: 1.1rem; text-align: center;            margin-bottom: 15px; outline: none; transition: 0.3s;        }        input[type="text"]:focus { border-color: var(--primary); }        .check-btn {            background: var(--primary); color: white; padding: 12px 45px;            border: none; border-radius: 50px; cursor: pointer;            font-weight: bold; font-size: 1.1rem; transition: 0.3s; margin-top: 10px;        }        .check-btn:hover { transform: translateY(-2px); opacity: 0.9; }        #feedback { margin-top: 15px; font-weight: bold; min-height: 24px; }        .review-item { text-align: left; background: #f1f2f6; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid var(--incorrect); font-size: 0.9rem; color: var(--dark); }        .hidden { display: none; }    </style></head><body>
+
+<div id="quiz-card">
+    <h2 style="color: var(--primary); margin-top: 0;">Navigate Grammar: Reading & Regrets</h2>
+    
+    <div id="start-screen">
+        <p>Topic: Past Modals for Regret (should have / shouldn't have)</p>
+        <input type="text" id="student-name" placeholder="Enter your full name">
+        <br>
+        <button class="check-btn" onclick="startQuiz()">Start Challenge</button>
+    </div>
+
+    <div id="game-container" class="hidden">
+        <div id="progress-bar"></div>
+        <div id="game-body">
+            <div class="text-box" id="story-text"></div>
+            <p id="ques" class="question"></p>
+            <input type="text" id="ans" placeholder="Type answer..." autocomplete="off">
+            <br>
+            <button class="check-btn" id="submit-btn" onclick="check()">Check Answer</button>
+            <div id="feedback"></div>
+        </div>
+    </div>
+
+    <div id="results" class="hidden">
+        <h1>Challenge Complete</h1>
+        <p id="score-text" style="font-size: 3rem; color: var(--primary); font-weight: bold;"></p>
+        <div id="analysis-area" style="margin-bottom: 20px;"></div>
+        <button class="check-btn" onclick="location.reload()">Try New Text</button>
+    </div>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzjaoBxGbsuMNHNvenbb_3wAw1XKuGLHSFoSHbvT3NL0zAkFbWSppPQVyYLxjTxCJFp/exec";
+
+    const storyBank = [
+        {
+            text: "Sarah decided to hike the mountain trail alone. She didn't check the weather forecast and forgot her water bottle at home. Halfway up, it started snowing heavily. She got lost because she didn't have a map. Eventually, mountain rescue found her shivering in a light jacket.",
+            questions: [
+                { q: "She _______________ the mountain alone. (go)", a: "shouldn't have gone" },
+                { q: "She _______________ the weather forecast. (check)", a: "should have checked" },
+                { q: "She _______________ her water bottle. (forget)", a: "shouldn't have forgotten" },
+                { q: "She _______________ a map with her. (take)", a: "should have taken" },
+                { q: "She _______________ a warmer jacket. (wear)", a: "should have worn" }
+            ]
+        },
+        {
+            text: "James had a job interview at 9:00 AM. He stayed up until 3:00 AM playing video games. He overslept and missed the bus. He took an expensive taxi, but arrived 20 minutes late. He didn't wear a tie, and the manager looked very unimpressed.",
+            questions: [
+                { q: "He _______________ up so late. (stay)", a: "shouldn't have stayed" },
+                { q: "He _______________ to bed earlier. (go)", a: "should have gone" },
+                { q: "He _______________ the bus. (miss)", a: "shouldn't have missed" },
+                { q: "He _______________ on time. (arrive)", a: "should have arrived" },
+                { q: "He _______________ a tie. (wear)", a: "should have worn" }
+            ]
+        },
+        {
+            text: "Last summer, Tom booked a cheap flight to Italy. He didn't check the airport location and realized it was 100km away from the city. He also forgot to renew his passport until the last minute, which cost him extra fees. Finally, he didn't learn any basic Italian phrases before going.",
+            questions: [
+                { q: "He _______________ the airport location. (check)", a: "should have checked" },
+                { q: "He _______________ to renew his passport earlier. (remember)", a: "should have remembered" },
+                { q: "He _______________ extra fees. (pay)", a: "shouldn't have paid" },
+                { q: "He _______________ some basic Italian. (learn)", a: "should have learned" },
+                { q: "He _______________ more carefully. (plan)", a: "should have planned" }
+            ]
+        },
+        {
+            text: "Amanda posted a private photo on social media by mistake. She didn't check her privacy settings before clicking 'post'. Many strangers saw the photo and shared it. She felt very embarrassed and deleted her account. She didn't think about the consequences of her actions.",
+            questions: [
+                { q: "She _______________ that photo. (post)", a: "shouldn't have posted" },
+                { q: "She _______________ her privacy settings. (check)", a: "should have checked" },
+                { q: "She _______________ more careful. (be)", a: "should have been" },
+                { q: "She _______________ about the consequences. (think)", a: "should have thought" },
+                { q: "She _______________ her account by mistake. (publicize)", a: "shouldn't have publicized" }
+            ]
+        },
+        {
+            text: "The local football team lost the final match. The coach didn't let the best players start the game. They didn't practice their penalty kicks during the week. During the game, the captain argued with the referee and got a red card. The fans were very disappointed.",
+            questions: [
+                { q: "The coach _______________ the best players start. (let)", a: "should have let" },
+                { q: "The team _______________ their penalties. (practice)", a: "should have practiced" },
+                { q: "The captain _______________ with the referee. (argue)", a: "shouldn't have argued" },
+                { q: "He _______________ a red card. (get)", a: "shouldn't have gotten" },
+                { q: "They _______________ harder for the final. (train)", a: "should have trained" }
+            ]
+        }
+    ];
+
+    let currentStory;
+    let idx = 0;
+    let score = 0;
+    let studentName = "";
+    let mistakes = [];
+
+    const audio = new (window.AudioContext || window.webkitAudioContext)();
+    function beep(f, t) {
+        const o = audio.createOscillator(); const g = audio.createGain();
+        o.connect(g); g.connect(audio.destination); o.type = t; o.frequency.value = f;
+        g.gain.setValueAtTime(0.1, audio.currentTime); o.start(); o.stop(audio.currentTime + 0.3);
+    }
+
+    function startQuiz() {
+        studentName = document.getElementById('student-name').value.trim();
+        if (!studentName) { alert("Please enter your name."); return; }
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('game-container').classList.remove('hidden');
+        init();
+    }
+
+    function init() {
+        currentStory = storyBank[Math.floor(Math.random() * storyBank.length)];
+        const bar = document.getElementById('progress-bar');
+        bar.innerHTML = '';
+        currentStory.questions.forEach((_, i) => {
+            const s = document.createElement('div'); s.className = 'seg'; s.id = 's'+i;
+            bar.appendChild(s);
+        });
+        document.getElementById('story-text').innerText = currentStory.text;
+        load();
+    }
+
+    function load() {
+        if (idx >= currentStory.questions.length) return finish();
+        const q = currentStory.questions[idx];
+        document.getElementById('ques').innerText = q.q;
+        document.getElementById('ans').value = "";
+        document.getElementById('feedback').innerText = "";
+        document.getElementById('ans').disabled = false;
+        document.getElementById('submit-btn').disabled = false;
+        document.getElementById('ans').focus();
+    }
+
+    function check() {
+        const input = document.getElementById('ans');
+        // Normalize input: trim, lowercase, and treat backtick as an apostrophe
+        let val = input.value.trim().toLowerCase().replace(/`/g, "'");
+        
+        const correctContraction = currentStory.questions[idx].a.toLowerCase();
+        // Generate the full-form alternative (e.g., "shouldn't" -> "should not")
+        const correctFull = correctContraction.replace("n't", " not");
+        
+        const fb = document.getElementById('feedback');
+        const seg = document.getElementById('s'+idx);
+
+        input.disabled = true;
+        document.getElementById('submit-btn').disabled = true;
+
+        if (val === correctContraction || val === correctFull) {
+            score++; seg.classList.add('correct-bg');
+            fb.innerText = "Correct!"; fb.style.color = "var(--correct)";
+            beep(600, 'sine');
+        } else {
+            seg.classList.add('incorrect-bg');
+            fb.innerText = `Incorrect.`;
+            fb.style.color = "var(--incorrect)";
+            mistakes.push({
+                q: currentStory.questions[idx].q,
+                user: val || "(empty)",
+                correct: currentStory.questions[idx].a
+            });
+            beep(200, 'sawtooth');
+        }
+        idx++;
+        setTimeout(load, 2000);
+    }
+
+    async function finish() {
+        document.getElementById('game-container').classList.add('hidden');
+        document.getElementById('results').classList.remove('hidden');
+        document.getElementById('score-text').innerText = `${score} / 5`;
+
+        let analysisHtml = "";
+        if (mistakes.length > 0) {
+            analysisHtml = "<h3>Review Mistakes:</h3>";
+            mistakes.forEach(m => {
+                analysisHtml += `<div class="review-item">
+                    <strong>Item:</strong> ${m.q}<br>
+                    <span style="color:var(--incorrect)">Your answer: ${m.user}</span><br>
+                    <span style="color:var(--correct)">Correct: ${m.correct}</span>
+                </div>`;
+            });
+        }
+        document.getElementById('analysis-area').innerHTML = analysisHtml;
+
+        try {
+            const mistakesText = mistakes.map(m => `Q: ${m.q} | User: ${m.user} | Correct: ${m.correct}`).join("\n");
+            fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify({
+                    name: studentName,
+                    score: score,
+                    percentage: ((score / 5) * 100) + "%",
+                    mistakes: mistakesText
+                })
+            });
+        } catch (e) { console.log("Data sync error"); }
+    }
+
+    document.getElementById('ans').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter' && !this.disabled) check();
+    });
+</script></body></html>
